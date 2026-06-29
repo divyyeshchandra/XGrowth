@@ -119,8 +119,8 @@ async function generatePost(
       model,
       system: getRestructurePrompt(tone, structure, input.length),
       prompt: input,
-      maxOutputTokens: 1536,
-      temperature: 0.7,
+      maxOutputTokens: 2500,
+      temperature: 0.6,
     });
 
     // Deterministic clean-up runs on the full post (cliches, symbols, spacing).

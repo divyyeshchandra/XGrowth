@@ -33,7 +33,7 @@ Only items and links from the draft. The number in the hook must match the items
 const VIRAL = `THE VIRAL FORMULA (from top X creators, follow it):
 1. HOOK (line 1): make the reader curious, or hit them with something relatable or surprising. A boring first line gets scrolled past. Make it CONCRETE and specific. Never open with something vague like "this is a big deal", "i found something huge", or "this is wild". Lead with the actual thing (e.g. "found a site with 1000 free landing page templates").
 2. BODY: the real points, each on its own short line, with white space around it.
-3. CLOSER (last line): an emotional gut-punch or a sharp take that ties back to the hook. Never boring, never a hanging fact. This is what makes people reply.`;
+3. CLOSER (last line): an emotional gut-punch or a sharp take that ties back to the hook. If the draft already ends on a strong line, use that. Never add engagement-bait like "why not get started?" or "you'll be surprised". Never boring, never a hanging fact.`;
 
 const MOBILE = `MOBILE READABILITY (people read this on a phone, the #1 rule):
 - Each line is ONE complete thought, kept short and punchy. A short sentence is perfect.
@@ -55,7 +55,9 @@ const PUNCTUATION = `PUNCTUATION (this is how people spot AI, it matters a lot):
 
 const POV = `POINT OF VIEW: if the draft uses "I"/"my"/"me" (the author sharing their OWN news, work, or feelings), write the post in first person AS them. Example: "just hit 1000 followers feeling grateful" becomes "just hit 1000 followers today. honestly didn't think anyone cared what i post. feeling grateful." NEVER say "congrats" or address the author as "you". Otherwise, write as a knowledgeable observer.`;
 
-const NO_FABRICATION = `NEVER FABRICATE: use only facts, names, numbers, links, and items from the draft. Keep every link, name, number, and step that's there. If only one item exists, present one. Add opinion, never invented facts.`;
+const FOLLOW_STRUCTURE = `FOLLOW THE DRAFT'S OWN STRUCTURE (important): if the draft already has a clear structure (sections, levels, headers, numbered steps), keep that SAME structure, the same sections, the same order, the same headers. Do NOT invent new section names. Do NOT reorder. NEVER repeat the same content in two places. Your job is to clean up the wording, simplify it, and fix the spacing, not to reorganize it.`;
+
+const NO_FABRICATION = `NEVER FABRICATE: use only facts, names, numbers, links, items, and sections from the draft. Keep every link, name, number, step, and section that's there. If only one item exists, present one. Never invent sections or facts. Add opinion, never invented details.`;
 
 // Post length is driven by how much real content the draft has (measured
 // server-side, which is far more reliable than letting the model guess).
@@ -66,7 +68,10 @@ function lengthDirective(inputLength: number): string {
   if (inputLength < 700) {
     return "LENGTH: keep it tight. Include the real points, cut everything else.";
   }
-  return "LENGTH: this draft is long and detailed. Keep all the real points, steps, and links, but say each one in as few words as possible. A long post made of many SHORT lines, never long paragraphs.";
+  if (inputLength < 1200) {
+    return "LENGTH: this draft is long and detailed. Keep all the real points, steps, and links, but say each one in as few words as possible. A long post made of many SHORT lines, never long paragraphs.";
+  }
+  return "LENGTH: this draft is VERY long, with multiple sections (like levels, steps, or groups). You MUST keep EVERY section and EVERY item. Do NOT drop, skip, or merge any section. Cover all of them, in the draft's order. The post will be long, and that is correct. Just keep each line short and simple.";
 }
 
 export function getRestructurePrompt(
@@ -77,6 +82,8 @@ export function getRestructurePrompt(
   return `You are a top 1% X (Twitter) ghostwriter. You rewrite messy, rough info into a post that looks and reads like the best human creators on X. It must sound 100% human, never like AI.
 
 ${STRUCTURE_NOTE[structure]}
+
+${FOLLOW_STRUCTURE}
 
 ${VIRAL}
 

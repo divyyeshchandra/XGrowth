@@ -16,24 +16,21 @@ const STRUCTURE_NOTE: Record<Structure, string> = {
   narrative:
     "STRUCTURE (Narrative): all short prose lines, one thought per line, no bullets. Walk through it like telling a friend.",
   listicle:
-    'STRUCTURE (Listicle): a hook line, then a short lead-in ending with a colon (like "here\'s what you get:"), then "-" bullets, then a closing line. Keep bullets short, BUT if a draft item has a link or sub-details, keep them under the item (the link on its own line, the details as short ">" lines). Never drop a link or detail just to keep a bullet short.',
-  curated: `STRUCTURE (Curated list). Use this shape:
-
-<hook saying how many, e.g. "here are 3 worth your time">
-- <item name>: <link if the draft has one>
-> <short detail>
-- <item name>
-> <short detail>
-<closing line>
-
-Only items and links from the draft. The number in the hook must match the items listed.`,
+    'STRUCTURE (Listicle): a contextual hook (1-2 lines that set up who/what, like a person talking), then a short human setup line, then the points as "-" bullets grouped under short PLAIN lead-in lines ending with a colon (like "here\'s how it works:", "the results:"). Lead-in lines have NO dash. Never indent a bullet under another bullet. Bullets are human-phrased short clauses, not robotic fragments. If a draft item has a link or sub-details, keep them under the item (the link on its own line, the details as short ">" lines). End on a natural human closer.',
+  curated: `STRUCTURE (Curated): a structured, scannable post (bullets, not prose paragraphs).
+- Start with a contextual hook (1-2 lines that set up who/what like a person talking, NOT a bullet, NOT a bare stat), then a short human setup line.
+- If the draft is a list of distinct items (tools, courses, models): each item is "- name", with its link on its own line and its details as ">" lines, only if the draft has them. Never invent items or a count.
+- If the draft is a single topic (article, announcement, story): group the points under short PLAIN lead-in lines ending with a colon (like "here's how it works:", "the results:", "the catch:"), and put "-" bullets under each. Lead-in lines have NO dash. Keep ALL bullets at the same left edge, never indent a bullet under another bullet. Bullets are human-phrased, not robotic fragments. Keep a joke deadpan.
+- Keep the sections the draft ACTUALLY HAS. NEVER invent an item, link, count, "Notes" section, signature, detail, or closer that isn't in the draft.`,
 };
 
-// The viral formula, from a creator with 200k+ followers (viralXpostAlgo.md).
-const VIRAL = `THE VIRAL FORMULA (from top X creators, follow it):
-1. HOOK (line 1): make the reader curious, or hit them with something relatable or surprising. A boring first line gets scrolled past. Make it CONCRETE and specific. Never open with something vague like "this is a big deal", "i found something huge", or "this is wild". Lead with the actual thing (e.g. "found a site with 1000 free landing page templates").
-2. BODY: the real points, each on its own short line, with white space around it.
-3. CLOSER (last line): an emotional gut-punch or a sharp take that ties back to the hook. If the draft already ends on a strong line, use that. Never add engagement-bait like "why not get started?" or "you'll be surprised". Never boring, never a hanging fact.`;
+// The viral formula, from a creator with 200k+ followers (viralXpostAlgo.md):
+// readability, a hook that ropes the reader in, a personal/contextual body, an
+// emotional closer.
+const VIRAL = `THE VIRAL FORMULA (from viralXpostAlgo.md, follow it):
+1. HOOK (the most important line): set up the story like a real person would, introducing WHO and WHAT with just enough context to make the reader curious. Example shape: "Cognition Labs just introduced Devin Fusion, a new way to mix AI models and cut coding costs." Do NOT open with a bare number or stat on its own (NOT "X scored 57.6 points"). It should feel like a human telling a friend about something interesting, with context, not a headline of metrics. Never invent hype ("get ready to", "unlock the full potential").
+2. BODY: explain it with context and a light opinion woven in, like a smart friend talking you through it. Real points, each on its own short line with white space.
+3. CLOSER: a natural human ending tied to the draft (a light take, or what it means). If the draft ends on a punchline or sign-off (like "practice makes perfect" or "bookmark this"), end EXACTLY there. NEVER add a "Notes" line, "next steps:", engagement-bait, or a closer that isn't in the draft. For satire, stay deadpan.`;
 
 const MOBILE = `MOBILE READABILITY (people read this on a phone, the #1 rule):
 - Each line is ONE complete thought, kept short and punchy. A short sentence is perfect.
@@ -41,10 +38,11 @@ const MOBILE = `MOBILE READABILITY (people read this on a phone, the #1 rule):
 - Write one clear thought per line. A blank line goes between every thought (the app adds it), so the post breathes.
 - In a list, bullets are short fragments. A line carrying a link or a key detail can be longer, that's fine, never drop info to keep a line short.`;
 
-const SIMPLE_WORDS = `SIMPLE WORDS (simplify ruthlessly, this is how people tell humans from AI):
-- Use the plainest everyday words. Delete every word you can. Shorter and simpler always wins.
-- No fancy or "cool" words. Say "keeps up with" not "trades blows with", "fast" not "a beast", "versions" not "variants", "use" not "utilize", "slow" not "sluggish", "helps" not "facilitates".
-- It must read 100% like a real human wrote it fast, never like AI.`;
+const SIMPLE_WORDS = `HUMAN EXPLAINER VOICE (this is what makes it NOT sound like AI):
+- Write like a smart friend explaining this to someone. Give context and weave in a light opinion. Use natural connective tissue ("turns out", "here's the cool part", "the catch is", "honestly").
+- Even when you use bullets, the WORDS must sound human and contextual, like a person talking, NOT bare mechanical fragments or a spec sheet. Don't use robotic section labels like "next steps:".
+- Use the plainest everyday words and delete every word you can. Say "keeps up with" not "trades blows with", "fast" not "a beast", "versions" not "variants", "use" not "utilize", "slow" not "sluggish".
+- It must read 100% like a real human wrote it, never like AI.`;
 
 const PUNCTUATION = `PUNCTUATION (this is how people spot AI, it matters a lot):
 - NEVER use a colon to introduce your opinion or a label ("My honest take:", "The bottom line:", "The concern:"). Just say it plainly.
@@ -60,7 +58,7 @@ const FOLLOW_STRUCTURE = `FOLLOW THE DRAFT'S OWN STRUCTURE (important): if the d
 const LINKS_AND_DETAILS = `KEEP EVERY LINK AND DETAIL FAITHFULLY (this overrides brevity, but never add anything):
 - Keep EVERY link/URL from the draft, exactly as written, and each one ONCE. Never repeat a link.
 - A bare URL is NEVER a ">" detail line, and never goes in the middle of a bullet list.
-- If a link belongs to ONE list item (the draft shows it right next to that item), keep it on that item's line. If a link sits on its own near the END of the draft (a reminder or CTA link, not tied to one item), put it at the END of your post.
+- If a link belongs to ONE list item (the draft shows it right next to that item), keep it on that item's line. If a link is part of a setup step, keep it INSIDE that step. If a link sits on its own near the END of the draft (a reminder or CTA link, not tied to one item), put it at the END of your post. Don't move a link elsewhere or invent a description for it.
 - Only write a ">" detail line if that exact detail is ACTUALLY written under that item in the draft. If a bullet has no sub-details in the draft, keep it as a plain "-" bullet. NEVER invent ">" details or extra sub-points.
 - Completeness beats brevity: keep all items, links, and real details. But never ADD details, links, or sub-points that aren't in the draft.`;
 

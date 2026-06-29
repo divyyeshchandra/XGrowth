@@ -89,6 +89,31 @@ export function normalizeSpacing(text: string): string {
   return out.join("\n");
 }
 
+// Flattens nested bullets. The model sometimes indents "-" bullets (or ">"
+// details) under another bullet; X has no nested lists, so we pull every bullet
+// back to the left edge.
+function deNest(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => line.replace(/^\s+([->] )/, "$1"))
+    .join("\n");
+}
+
+// Removes any URL the output contains that was NOT in the original draft. The
+// model sometimes hallucinates a plausible-looking link (e.g. "devin.ai"). We
+// only allow links that actually appear in the draft.
+function stripUnknownUrls(text: string, draftUrls: Set<string>): string {
+  const norm = (u: string) =>
+    u.replace(/^https?:\/\//i, "").replace(/[/.,);]+$/, "").toLowerCase();
+  const allowed = new Set([...draftUrls].map(norm));
+  return text
+    .split("\n")
+    .map((line) =>
+      line.replace(/https?:\/\/\S+/g, (url) => (allowed.has(norm(url)) ? url : ""))
+    )
+    .join("\n");
+}
+
 // A bare URL is never a "> detail" — the model sometimes attaches a standalone
 // link to a random list item as a detail. Strip the "> " so it becomes a plain
 // link line (which the spacing normalizer then sets apart cleanly).
@@ -102,25 +127,41 @@ function unwrapUrlDetails(text: string): string {
     .join("\n");
 }
 
-// Drops repeated standalone-URL lines (the model sometimes scatters one link
-// into the middle of a list and again at the end). Keeps the first occurrence.
+// Drops misplaced/repeated standalone-URL lines. The model sometimes scatters a
+// link onto its own line (e.g. next to a list item) while the same URL also sits
+// inside a sentence/step where it belongs. We drop the standalone copy if that
+// URL appears inline elsewhere, and drop any repeated standalone occurrence.
 function dedupeUrlLines(text: string): string {
+  const lines = text.split("\n");
+
+  // URLs that appear inline (in a line with other text besides the URL).
+  const inline = new Set<string>();
+  for (const line of lines) {
+    const t = line.trim();
+    const m = t.match(/https?:\/\/\S+/);
+    if (m && t.replace(m[0], "").trim().length > 0) inline.add(m[0]);
+  }
+
   const seen = new Set<string>();
-  return text
-    .split("\n")
+  return lines
     .filter((line) => {
       const t = line.trim();
-      if (/^https?:\/\/\S+$/.test(t)) {
-        if (seen.has(t)) return false;
-        seen.add(t);
+      const m = t.match(/^(https?:\/\/\S+)$/);
+      if (m) {
+        const url = m[1];
+        if (inline.has(url)) return false; // belongs inline elsewhere
+        if (seen.has(url)) return false; // duplicate standalone
+        seen.add(url);
       }
       return true;
     })
     .join("\n");
 }
 
-export function finalizePost(raw: string): string {
+export function finalizePost(raw: string, draftUrls: Set<string> = new Set()): string {
   return normalizeSpacing(
-    dedupeUrlLines(unwrapUrlDetails(clean(stripThink(raw))))
+    dedupeUrlLines(
+      unwrapUrlDetails(stripUnknownUrls(deNest(clean(stripThink(raw))), draftUrls))
+    )
   ).trim();
 }

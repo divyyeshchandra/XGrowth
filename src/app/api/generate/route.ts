@@ -123,8 +123,10 @@ async function generatePost(
       temperature: 0.6,
     });
 
-    // Deterministic clean-up runs on the full post (cliches, symbols, spacing).
-    const post = finalizePost(text);
+    // Deterministic clean-up runs on the full post (cliches, symbols, spacing,
+    // and stripping any link the model invented that wasn't in the draft).
+    const draftUrls = new Set(input.match(/https?:\/\/\S+/g) || []);
+    const post = finalizePost(text, draftUrls);
 
     const headers: Record<string, string> = {
       "Content-Type": "text/plain; charset=utf-8",

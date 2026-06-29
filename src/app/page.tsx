@@ -10,24 +10,33 @@ import {
   ArrowRight,
   Square,
   AlertCircle,
+  Sparkles,
   AlignLeft,
   List,
+  ListTree,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { OutputCard } from "@/components/editor/output-card";
 import { useGenerate } from "@/hooks/use-generate";
 import { useSettingsStore } from "@/store/settings-store";
-import type { Tone, OutputMode } from "@/types";
+import type { Tone, Structure } from "@/types";
 
 const TONES: Tone[] = ["Professional", "Casual", "Bold", "Witty"];
+
+const STRUCTURES: { id: Structure; label: string; icon: typeof Sparkles }[] = [
+  { id: "smart", label: "Smart", icon: Sparkles },
+  { id: "narrative", label: "Narrative", icon: AlignLeft },
+  { id: "listicle", label: "Listicle", icon: List },
+  { id: "curated", label: "Curated", icon: ListTree },
+];
 
 type DeviceTab = "mobile" | "tablet" | "desktop";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [tone, setTone] = useState<Tone>("Casual");
-  const [mode, setMode] = useState<OutputMode>("single");
+  const [structure, setStructure] = useState<Structure>("smart");
   const [device, setDevice] = useState<DeviceTab>("mobile");
 
   const { output, isLoading, error, generate, stop } = useGenerate();
@@ -35,7 +44,7 @@ export default function Home() {
 
   const handleGenerate = () => {
     if (!input.trim() || isLoading) return;
-    generate(input, tone, mode);
+    generate(input, tone, structure);
   };
 
   const handleCopy = async () => {
@@ -45,7 +54,7 @@ export default function Home() {
 
   const handleRegenerate = () => {
     if (!input.trim() || isLoading) return;
-    generate(input, tone, mode);
+    generate(input, tone, structure);
   };
 
   const deviceWidths: Record<DeviceTab, string> = {
@@ -131,34 +140,29 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Mode toggle */}
-          <div className="flex items-center gap-2">
+          {/* Structure selector */}
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[12px] text-muted-foreground/60 uppercase tracking-wider font-medium">
-              Format
+              Structure
             </span>
-            <div className="flex rounded-xl bg-white/[0.04] p-1">
-              <button
-                onClick={() => setMode("single")}
-                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all ${
-                  mode === "single"
-                    ? "bg-white/[0.1] text-foreground shadow-sm"
-                    : "text-muted-foreground/60 hover:text-muted-foreground"
-                }`}
-              >
-                <AlignLeft className="h-3.5 w-3.5" />
-                Single
-              </button>
-              <button
-                onClick={() => setMode("thread")}
-                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all ${
-                  mode === "thread"
-                    ? "bg-white/[0.1] text-foreground shadow-sm"
-                    : "text-muted-foreground/60 hover:text-muted-foreground"
-                }`}
-              >
-                <List className="h-3.5 w-3.5" />
-                Thread
-              </button>
+            <div className="flex rounded-xl bg-white/[0.04] p-1 flex-wrap">
+              {STRUCTURES.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setStructure(s.id)}
+                    className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all ${
+                      structure === s.id
+                        ? "bg-white/[0.1] text-foreground shadow-sm"
+                        : "text-muted-foreground/60 hover:text-muted-foreground"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

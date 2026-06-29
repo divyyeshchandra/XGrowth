@@ -2,7 +2,7 @@ export type Provider = "groq" | "openrouter" | "anthropic" | "openai" | "custom"
 
 export type Tone = "Professional" | "Casual" | "Bold" | "Witty";
 
-export type OutputMode = "single" | "thread";
+export type Structure = "smart" | "narrative" | "listicle" | "curated";
 
 export interface ProviderConfig {
   provider: Provider;

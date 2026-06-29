@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useSettingsStore } from "@/store/settings-store";
 import { incrementUsage, getUsage } from "@/lib/storage";
-import type { Tone, OutputMode } from "@/types";
+import type { Tone, Structure } from "@/types";
 
 export function useGenerate() {
   const { provider, customBaseUrl, customModel, currentApiKey, isBYOK } =
@@ -16,7 +16,7 @@ export function useGenerate() {
     useState<AbortController | null>(null);
 
   const generate = useCallback(
-    async (input: string, tone: Tone, mode: OutputMode) => {
+    async (input: string, tone: Tone, structure: Structure) => {
       setOutput("");
       setError(null);
       setIsLoading(true);
@@ -31,7 +31,7 @@ export function useGenerate() {
           body: JSON.stringify({
             input,
             tone,
-            mode,
+            structure,
             provider,
             apiKey: currentApiKey(),
             customBaseUrl,

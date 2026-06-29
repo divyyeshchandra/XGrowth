@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# X GlowUp
+
+> The best free webapp to turn rough drafts into high-quality, viral-ready X posts.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Layer      | Technology                  |
+|------------|-----------------------------|
+| Framework  | Next.js 15 (App Router)     |
+| Styling    | Tailwind CSS + shadcn/ui    |
+| AI Layer   | Vercel AI SDK               |
+| State      | Zustand                     |
+| Rate Limit | Upstash Redis (free tier)   |
+| Deployment | Vercel (free)               |
+| Providers  | Groq, OpenRouter, Anthropic, OpenAI, Custom |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/
+    page.tsx                  # main app
+    layout.tsx                # root layout + dark mode
+    api/
+      generate/route.ts       # post restructuring (streaming)
+      virality/route.ts       # virality score
+      niche/route.ts          # niche angle helper
+  components/
+    ui/                       # shadcn primitives
+    navbar.tsx                # top nav bar
+    editor/                   # input area, toolbar
+    preview/                  # device frames + X post mock
+    virality/                 # score gauge, breakdown cards
+    settings/                 # BYOK modal, provider selector
+  hooks/
+  lib/
+    ai/
+      providers.ts            # provider registry + model map
+      prompts.ts              # system prompts
+      schemas.ts              # zod schemas for structured output
+    ratelimit.ts              # server-side IP rate limiting
+    storage.ts                # localStorage helpers
+  store/
+    settings-store.ts         # Zustand store
+  types/
+    index.ts                  # TypeScript types
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All AI calls go through Next.js Route Handlers (server-side). BYOK keys are stored in localStorage and sent per-request — never persisted on the server. Free-tier rate limiting is enforced server-side by IP via Upstash Redis.
 
-## Deploy on Vercel
+## Environment Variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# See .env.example
+GROQ_FREE_KEY=
+OPENROUTER_FREE_KEY=
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+FREE_TIER_DAILY_LIMIT=10
+```

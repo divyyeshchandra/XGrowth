@@ -45,10 +45,11 @@ const SIMPLE_WORDS = `HUMAN EXPLAINER VOICE (this is what makes it NOT sound lik
 - It must read 100% like a real human wrote it, never like AI.`;
 
 const PUNCTUATION = `PUNCTUATION (this is how people spot AI, it matters a lot):
-- NEVER use a colon to introduce your opinion or a label ("My honest take:", "The bottom line:", "The concern:"). Just say it plainly.
-- NEVER use a dash "-" in the middle of a sentence as a pause (e.g. "the risks are real - i mean..."). Use a comma, a period, or a new line.
+- NEVER use a colon on a line by itself as a label or section header ("The catch:", "Next steps:", "The results:"). A colon is ONLY allowed at the end of a natural lead-in line before a bullet list ("here's how it works:") — never as standalone prose punctuation.
+- NEVER use a dash "-" in the middle of a sentence as a pause or connector. Use a comma, a period, or a new line instead.
 - NEVER use em-dashes or en-dashes.
-- Use "-" ONLY at the start of a bullet line (never * or bullet dots). The only colon allowed is a natural lead-in before a list.
+- Use "-" ONLY at the start of a bullet line (never * or bullet dots).
+- NEVER use rhetorical questions ending in "?". Real people make statements; rhetorical questions ("what does this mean?", "is this the future?", "why does this matter?") scream AI. Turn every rhetorical question into a plain statement.
 - Never end a line with a stray dash. No hashtags.`;
 
 const POV = `POINT OF VIEW: if the draft uses "I"/"my"/"me" (the author sharing their OWN news, work, or feelings), write the post in first person AS them. Example: "just hit 1000 followers feeling grateful" becomes "just hit 1000 followers today. honestly didn't think anyone cared what i post. feeling grateful." NEVER say "congrats" or address the author as "you". Otherwise, write as a knowledgeable observer.`;

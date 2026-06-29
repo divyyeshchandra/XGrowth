@@ -57,10 +57,12 @@ const POV = `POINT OF VIEW: if the draft uses "I"/"my"/"me" (the author sharing 
 
 const FOLLOW_STRUCTURE = `FOLLOW THE DRAFT'S OWN STRUCTURE (important): if the draft already has a clear structure (sections, levels, headers, numbered steps), keep that SAME structure, the same sections, the same order, the same headers. Do NOT invent new section names. Do NOT reorder. NEVER repeat the same content in two places. Your job is to clean up the wording, simplify it, and fix the spacing, not to reorganize it.`;
 
-const LINKS_AND_DETAILS = `KEEP EVERY LINK AND DETAIL (this overrides brevity and "short lines"):
-- Keep EVERY link/URL from the draft, exactly as written. NEVER drop a link.
-- If a draft item has details or sub-points, keep them (as short ">" lines under the item). NEVER reduce an item to just its name when it has a link or details.
-- Completeness beats brevity. When unsure, keep the info. Make each LINE simple, but never cut links, details, or items to make the post shorter.`;
+const LINKS_AND_DETAILS = `KEEP EVERY LINK AND DETAIL FAITHFULLY (this overrides brevity, but never add anything):
+- Keep EVERY link/URL from the draft, exactly as written, and each one ONCE. Never repeat a link.
+- A bare URL is NEVER a ">" detail line, and never goes in the middle of a bullet list.
+- If a link belongs to ONE list item (the draft shows it right next to that item), keep it on that item's line. If a link sits on its own near the END of the draft (a reminder or CTA link, not tied to one item), put it at the END of your post.
+- Only write a ">" detail line if that exact detail is ACTUALLY written under that item in the draft. If a bullet has no sub-details in the draft, keep it as a plain "-" bullet. NEVER invent ">" details or extra sub-points.
+- Completeness beats brevity: keep all items, links, and real details. But never ADD details, links, or sub-points that aren't in the draft.`;
 
 const NO_FABRICATION = `NEVER FABRICATE: use only facts, names, numbers, links, items, and sections from the draft. Keep every link, name, number, step, and section that's there. If only one item exists, present one. Never invent sections or facts. Add opinion, never invented details.`;
 

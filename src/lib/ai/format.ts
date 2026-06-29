@@ -89,6 +89,38 @@ export function normalizeSpacing(text: string): string {
   return out.join("\n");
 }
 
+// A bare URL is never a "> detail" — the model sometimes attaches a standalone
+// link to a random list item as a detail. Strip the "> " so it becomes a plain
+// link line (which the spacing normalizer then sets apart cleanly).
+function unwrapUrlDetails(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => {
+      const m = line.match(/^(\s*)>\s+(https?:\/\/\S+)\s*$/);
+      return m ? `${m[1]}${m[2]}` : line;
+    })
+    .join("\n");
+}
+
+// Drops repeated standalone-URL lines (the model sometimes scatters one link
+// into the middle of a list and again at the end). Keeps the first occurrence.
+function dedupeUrlLines(text: string): string {
+  const seen = new Set<string>();
+  return text
+    .split("\n")
+    .filter((line) => {
+      const t = line.trim();
+      if (/^https?:\/\/\S+$/.test(t)) {
+        if (seen.has(t)) return false;
+        seen.add(t);
+      }
+      return true;
+    })
+    .join("\n");
+}
+
 export function finalizePost(raw: string): string {
-  return normalizeSpacing(clean(stripThink(raw))).trim();
+  return normalizeSpacing(
+    dedupeUrlLines(unwrapUrlDetails(clean(stripThink(raw))))
+  ).trim();
 }

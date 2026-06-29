@@ -16,7 +16,7 @@ const STRUCTURE_NOTE: Record<Structure, string> = {
   narrative:
     "STRUCTURE (Narrative): all short prose lines, one thought per line, no bullets. Walk through it like telling a friend.",
   listicle:
-    'STRUCTURE (Listicle): a hook line, then a short lead-in ending with a colon (like "here\'s what you get:"), then short "-" bullets (a few words each), then a closing line.',
+    'STRUCTURE (Listicle): a hook line, then a short lead-in ending with a colon (like "here\'s what you get:"), then "-" bullets, then a closing line. Keep bullets short, BUT if a draft item has a link or sub-details, keep them under the item (the link on its own line, the details as short ">" lines). Never drop a link or detail just to keep a bullet short.',
   curated: `STRUCTURE (Curated list). Use this shape:
 
 <hook saying how many, e.g. "here are 3 worth your time">
@@ -39,7 +39,7 @@ const MOBILE = `MOBILE READABILITY (people read this on a phone, the #1 rule):
 - Each line is ONE complete thought, kept short and punchy. A short sentence is perfect.
 - Do NOT split a single thought across multiple lines (don't chop "it keeps up with claude" / "on coding and math" into separate lines). And do NOT cram two thoughts onto one line.
 - Write one clear thought per line. A blank line goes between every thought (the app adds it), so the post breathes.
-- In a list, bullets are short fragments, a few words each.`;
+- In a list, bullets are short fragments. A line carrying a link or a key detail can be longer, that's fine, never drop info to keep a line short.`;
 
 const SIMPLE_WORDS = `SIMPLE WORDS (simplify ruthlessly, this is how people tell humans from AI):
 - Use the plainest everyday words. Delete every word you can. Shorter and simpler always wins.
@@ -56,6 +56,11 @@ const PUNCTUATION = `PUNCTUATION (this is how people spot AI, it matters a lot):
 const POV = `POINT OF VIEW: if the draft uses "I"/"my"/"me" (the author sharing their OWN news, work, or feelings), write the post in first person AS them. Example: "just hit 1000 followers feeling grateful" becomes "just hit 1000 followers today. honestly didn't think anyone cared what i post. feeling grateful." NEVER say "congrats" or address the author as "you". Otherwise, write as a knowledgeable observer.`;
 
 const FOLLOW_STRUCTURE = `FOLLOW THE DRAFT'S OWN STRUCTURE (important): if the draft already has a clear structure (sections, levels, headers, numbered steps), keep that SAME structure, the same sections, the same order, the same headers. Do NOT invent new section names. Do NOT reorder. NEVER repeat the same content in two places. Your job is to clean up the wording, simplify it, and fix the spacing, not to reorganize it.`;
+
+const LINKS_AND_DETAILS = `KEEP EVERY LINK AND DETAIL (this overrides brevity and "short lines"):
+- Keep EVERY link/URL from the draft, exactly as written. NEVER drop a link.
+- If a draft item has details or sub-points, keep them (as short ">" lines under the item). NEVER reduce an item to just its name when it has a link or details.
+- Completeness beats brevity. When unsure, keep the info. Make each LINE simple, but never cut links, details, or items to make the post shorter.`;
 
 const NO_FABRICATION = `NEVER FABRICATE: use only facts, names, numbers, links, items, and sections from the draft. Keep every link, name, number, step, and section that's there. If only one item exists, present one. Never invent sections or facts. Add opinion, never invented details.`;
 
@@ -84,6 +89,8 @@ export function getRestructurePrompt(
 ${STRUCTURE_NOTE[structure]}
 
 ${FOLLOW_STRUCTURE}
+
+${LINKS_AND_DETAILS}
 
 ${VIRAL}
 

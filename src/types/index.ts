@@ -11,13 +11,15 @@ export interface ProviderConfig {
   model?: string;
 }
 
+// Mirrors viralXpostAlgo.md's "4 parts to a viral tweet": readability, hook,
+// personal body, emotional closer.
 export interface ViralityScore {
   score: number;
   breakdown: {
-    hookStrength: number;
-    emotionalTrigger: number;
-    callToAction: number;
     readability: number;
+    hook: number;
+    body: number;
+    closer: number;
   };
   suggestions: string[];
 }

@@ -3,11 +3,6 @@
 import { useState } from "react";
 import {
   Zap,
-  MessageCircle,
-  Repeat2,
-  Heart,
-  Eye,
-  ArrowRight,
   Square,
   AlertCircle,
   Sparkles,
@@ -18,7 +13,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { OutputCard } from "@/components/editor/output-card";
+import { DevicePreview } from "@/components/preview/device-preview";
+import { ViralityCard } from "@/components/virality/virality-card";
 import { useGenerate } from "@/hooks/use-generate";
+import { useVirality } from "@/hooks/use-virality";
 import { useSettingsStore } from "@/store/settings-store";
 import type { Tone, Structure } from "@/types";
 
@@ -31,19 +29,24 @@ const STRUCTURES: { id: Structure; label: string; icon: typeof Sparkles }[] = [
   { id: "curated", label: "Curated", icon: ListTree },
 ];
 
-type DeviceTab = "mobile" | "tablet" | "desktop";
-
 export default function Home() {
   const [input, setInput] = useState("");
   const [tone, setTone] = useState<Tone>("Casual");
   const [structure, setStructure] = useState<Structure>("smart");
-  const [device, setDevice] = useState<DeviceTab>("mobile");
 
   const { output, isLoading, error, generate, stop } = useGenerate();
+  const {
+    score: viralityScore,
+    isLoading: viralityLoading,
+    error: viralityError,
+    checkVirality,
+    reset: resetVirality,
+  } = useVirality();
   const { openSettings } = useSettingsStore();
 
   const handleGenerate = () => {
     if (!input.trim() || isLoading) return;
+    resetVirality();
     generate(input, tone, structure);
   };
 
@@ -54,13 +57,8 @@ export default function Home() {
 
   const handleRegenerate = () => {
     if (!input.trim() || isLoading) return;
+    resetVirality();
     generate(input, tone, structure);
-  };
-
-  const deviceWidths: Record<DeviceTab, string> = {
-    mobile: "max-w-[375px]",
-    tablet: "max-w-[580px]",
-    desktop: "max-w-[680px]",
   };
 
   return (
@@ -206,94 +204,17 @@ export default function Home() {
       </div>
 
       {/* Device Preview */}
-      <div className="glass-card rounded-2xl p-6 space-y-5">
-        <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-muted-foreground tracking-wide uppercase">
-            Preview on X
-          </span>
-          <div className="flex rounded-xl bg-white/[0.04] p-1">
-            {(["mobile", "tablet", "desktop"] as DeviceTab[]).map((d) => (
-              <button
-                key={d}
-                onClick={() => setDevice(d)}
-                className={`rounded-lg px-4 py-1.5 text-[13px] font-medium capitalize transition-all ${
-                  device === d
-                    ? "bg-white/[0.1] text-foreground shadow-sm"
-                    : "text-muted-foreground/60 hover:text-muted-foreground"
-                }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-        </div>
+      <DevicePreview output={output} />
 
-        {/* Mock X Post */}
-        <div className="flex justify-center">
-          <div
-            className={`w-full ${deviceWidths[device]} rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all duration-300`}
-          >
-            <div className="flex gap-3.5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#6C8EEF]/30 to-[#8B5CF6]/30 text-[14px] font-bold text-[#6C8EEF]">
-                Y
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-[15px]">You</span>
-                  <svg
-                    className="h-4 w-4 text-[#1d9bf0]"
-                    fill="currentColor"
-                    viewBox="0 0 22 22"
-                  >
-                    <path d="M20.4 8.86a8.16 8.16 0 01-2.3.64 4.1 4.1 0 001.8-2.27 8.07 8.07 0 01-2.6 1 4.07 4.07 0 00-6.95 3.71A11.56 11.56 0 013 5.78a4.08 4.08 0 001.26 5.44 4 4 0 01-1.85-.51v.05a4.07 4.07 0 003.27 4 4 4 0 01-1.84.07 4.08 4.08 0 003.8 2.83A8.17 8.17 0 012 19.28a11.5 11.5 0 006.29 1.84A11.5 11.5 0 0019.85 9.7v-.53A8.25 8.25 0 0022 7.1a8.2 8.2 0 01-2.36.65 4.12 4.12 0 001.8-2.27l-.04-.01z" />
-                  </svg>
-                  <span className="text-[13px] text-muted-foreground/50">
-                    @you · 1m
-                  </span>
-                </div>
-                <div className="mt-3 whitespace-pre-wrap text-[14px] leading-[1.7] text-foreground/85">
-                  {output
-                    ? output.replaceAll("\n---\n", "\n\n")
-                    : "Your post preview will show here..."}
-                </div>
-                <div className="mt-5 flex justify-between pt-3 border-t border-white/[0.04]">
-                  {[
-                    { icon: MessageCircle, val: "24", hoverColor: "hover:text-[#1d9bf0]" },
-                    { icon: Repeat2, val: "142", hoverColor: "hover:text-emerald-400" },
-                    { icon: Heart, val: "1.2K", hoverColor: "hover:text-rose-400" },
-                    { icon: Eye, val: "45K", hoverColor: "hover:text-muted-foreground" },
-                  ].map((item, i) => (
-                    <button
-                      key={i}
-                      className={`flex items-center gap-1.5 text-[12px] text-muted-foreground/40 ${item.hoverColor} transition-colors`}
-                    >
-                      <item.icon className="h-[15px] w-[15px]" />
-                      {item.val}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Virality Score & Niche — placeholders for M4/M5 */}
+      {/* Virality Score & Niche */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Virality Score */}
-        <div className="glass-card rounded-2xl p-6 space-y-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] font-medium text-muted-foreground tracking-wide uppercase">
-              Virality Score
-            </span>
-            <span className="rounded-full bg-white/[0.04] px-3 py-1 text-[11px] text-muted-foreground/50 uppercase tracking-wider">
-              Coming in M4
-            </span>
-          </div>
-          <div className="flex flex-col items-center justify-center h-32 text-muted-foreground/20">
-            <p className="text-[14px]">Generate a post to see its virality score</p>
-          </div>
-        </div>
+        <ViralityCard
+          hasOutput={!!output}
+          score={viralityScore}
+          isLoading={viralityLoading}
+          error={viralityError}
+          onCheck={() => checkVirality(output)}
+        />
 
         {/* Niche Angles */}
         <div className="glass-card rounded-2xl p-6 space-y-5">

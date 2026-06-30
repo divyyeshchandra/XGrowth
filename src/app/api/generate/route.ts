@@ -1,9 +1,8 @@
 import { generateText } from "ai";
-import { headers } from "next/headers";
-import { createProviderModel, PROVIDER_INFO } from "@/lib/ai/providers";
+import { createProviderModel } from "@/lib/ai/providers";
 import { getRestructurePrompt } from "@/lib/ai/prompts";
 import { finalizePost } from "@/lib/ai/format";
-import { checkRateLimit } from "@/lib/ratelimit";
+import { resolveProviderAuth } from "@/lib/api-auth";
 import type { Provider, Tone, Structure } from "@/types";
 
 export const runtime = "edge";
@@ -44,61 +43,15 @@ export async function POST(req: Request) {
     );
   }
 
-  const isBYOK = !!apiKey;
-  let resolvedKey = apiKey || "";
-  let remaining = 999;
+  const authResult = await resolveProviderAuth(provider, apiKey);
+  if (!authResult.ok) return authResult.response;
 
-  if (!isBYOK) {
-    // Free tier — use server-side key + rate limit
-    const headersList = await headers();
-    const ip =
-      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      headersList.get("x-real-ip") ||
-      "127.0.0.1";
-
-    const limit = await checkRateLimit(ip);
-    if (!limit.allowed) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "Daily free limit reached. Add your own API key in settings to continue.",
-          remaining: 0,
-        }),
-        { status: 429, headers: { "Content-Type": "application/json" } }
-      );
-    }
-    remaining = limit.remaining;
-
-    if (provider === "groq" || !provider) {
-      resolvedKey = process.env.GROQ_FREE_KEY || "";
-    } else if (provider === "openrouter") {
-      resolvedKey = process.env.OPENROUTER_FREE_KEY || "";
-    }
-
-    if (!resolvedKey) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "Free tier not configured. Please add your own API key in settings.",
-        }),
-        { status: 503, headers: { "Content-Type": "application/json" } }
-      );
-    }
-  } else if (!PROVIDER_INFO[provider]) {
-    return new Response(JSON.stringify({ error: "Invalid provider" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  return generatePost(
-    provider || "groq",
-    resolvedKey,
-    input,
-    tone,
-    structure,
-    { customBaseUrl, customModel, remaining: isBYOK ? undefined : remaining }
-  );
+  const { auth } = authResult;
+  return generatePost(auth.provider, auth.apiKey, input, tone, structure, {
+    customBaseUrl,
+    customModel,
+    remaining: auth.remaining,
+  });
 }
 
 async function generatePost(

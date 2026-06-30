@@ -75,7 +75,7 @@ function kindOf(line: string): LineKind {
 export function normalizeSpacing(text: string): string {
   const lines = text
     .split("\n")
-    .map((l) => l.replace(/\s+$/, ""))
+    .map((l) => l.replace(/^[ \t]+/, "").replace(/[ \t]+$/, "")) // X posts have no indents
     .filter((l) => l.trim().length > 0);
 
   const out: string[] = [];
@@ -101,6 +101,36 @@ function deNest(text: string): string {
   return text
     .split("\n")
     .map((line) => line.replace(/^\s+([->] )/, "$1"))
+    .join("\n");
+}
+
+// One sentence per line is the signature of real human X posts (every example
+// the user gave does it). The model often crams 2-3 sentences onto one prose
+// line; this splits a prose line at sentence boundaries so normalizeSpacing can
+// then put white space between them. Bullets, ">" details, lead-in label lines
+// (ending in ":"), and bare URLs are left untouched.
+const ABBR = new Set([
+  "u.s.", "e.g.", "i.e.", "vs.", "etc.", "a.m.", "p.m.", "mr.", "mrs.",
+  "dr.", "inc.", "jr.", "sr.", "no.", "vol.", "st.", "ft.",
+]);
+function splitSentences(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => {
+      const t = line.trimStart();
+      if (t.startsWith("- ") || t.startsWith("> ") || t === "-") return line;
+      if (/:\s*$/.test(line)) return line; // lead-in label line
+      if (/^https?:\/\/\S+$/.test(t)) return line; // bare URL
+      return line.replace(
+        /([.!?])\s+(?=["'A-Za-z])/g,
+        (m, punct: string, offset: number, str: string) => {
+          if (punct === "." && str[offset - 1] === ".") return m; // ellipsis
+          const lastWord = (str.slice(0, offset + 1).match(/(\S+)$/) || ["", ""])[1].toLowerCase();
+          if (ABBR.has(lastWord) || /^[a-z]\.$/i.test(lastWord)) return m; // abbrev/initial
+          return punct + "\n";
+        }
+      );
+    })
     .join("\n");
 }
 
@@ -166,7 +196,9 @@ function dedupeUrlLines(text: string): string {
 export function finalizePost(raw: string, draftUrls: Set<string> = new Set()): string {
   return normalizeSpacing(
     dedupeUrlLines(
-      unwrapUrlDetails(stripUnknownUrls(deNest(clean(stripThink(raw))), draftUrls))
+      unwrapUrlDetails(
+        stripUnknownUrls(deNest(splitSentences(clean(stripThink(raw)))), draftUrls)
+      )
     )
   ).trim();
 }

@@ -24,6 +24,11 @@ const REPLACEMENTS: [RegExp, string][] = [
   [/\bchanging the game\b/gi, "making a real difference"],
   [/\bshaking things up\b/gi, "making a real change"],
   [/\bmaking waves\b/gi, "getting real attention"],
+  // Formal/complex words the model reaches for. Plain swaps a human would use.
+  [/\blucrative ventures\b/gi, "ways to make money"],
+  [/\bfollowing suit\b/gi, "doing the same"],
+  [/\bkey to symbiosis\b/gi, "key to working together"],
+  [/\ba plethora of\b/gi, "a lot of"],
   [/\btak(?:e|es|ing) notice of\b/gi, "paying attention to"],
   [/\btak(?:e|es|ing) notice\b/gi, "paying attention"],
   [/\bwake[\s-]?up call\b/gi, "a warning sign"],

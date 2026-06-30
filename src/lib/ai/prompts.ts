@@ -28,9 +28,9 @@ const STRUCTURE_NOTE: Record<Structure, string> = {
 // readability, a hook that ropes the reader in, a personal/contextual body, an
 // emotional closer.
 const VIRAL = `THE VIRAL FORMULA (from viralXpostAlgo.md, follow it):
-1. HOOK (the single most important line): it must STOP THE SCROLL. Scan the WHOLE draft for the most jaw-dropping, surprising, or relatable thing in it, and LEAD WITH THAT. Do NOT just rephrase the draft's first sentence or someone's abstract argument (NOT "Elon Musk thinks brain implants can help with AI"). Lead with the WOW (a stunning fact or capability: "people are already controlling computers with their minds"), the BENEFIT ("Cognition Labs just made coding 41% cheaper"), or the STAKES (a provocative challenge the reader cares about), with who/what woven in right after. Never a flat recap ("X thinks/introduced Y"), never a raw jargon metric ("X scored 57.6 points"), never invented hype.
+1. HOOK (the single most important line): it must STOP THE SCROLL. Scan the WHOLE draft for the most jaw-dropping, surprising, or relatable thing in it, and LEAD WITH THAT. Do NOT just rephrase the draft's first sentence or someone's abstract argument (NOT "Elon Musk thinks brain implants can help with AI"). Lead with the WOW (a stunning fact or capability: "people are already controlling computers with their minds"), the BENEFIT ("Cognition Labs just made coding 41% cheaper"), or the STAKES (a provocative challenge the reader cares about), with who/what woven in right after. Never a flat recap ("X thinks/introduced Y"), never a raw jargon metric ("X scored 57.6 points"), never invented hype. And NEVER use a colon before a value in the hook ("X shared his numbers: $83,701") — write it like a person would say it out loud ("X just pulled in $83,701").
 2. BODY: explain it with context and a light opinion woven in, like a smart friend talking you through it. Real points, each on its own short line with white space.
-3. CLOSER: ONE strong ending. A single specific question to the reader is a great closer ("which one are you waiting for?") — but use only ONE question, never a pile of stacked questions. Keep the draft's own ending/CTA if it has one (reworded). NEVER add a "Notes" line, "next steps:", or invented engagement-bait. For satire, stay deadpan.`;
+3. CLOSER: ONE strong ending. A single specific question to the reader can be a great closer, but it MUST fit THIS post's actual topic. Do NOT slap on a generic "which one are you waiting for?" when it doesn't make sense for the content. Use only ONE question, never stacked questions. Keep the draft's own ending/CTA if it has one (reworded). If no real question fits, end on a plain, short human take. NEVER add a "Notes" line, "next steps:", or invented engagement-bait. For satire, stay deadpan.`;
 
 const MOBILE = `MOBILE READABILITY (people read this on a phone, the #1 rule):
 - Each line is ONE complete thought, kept short and punchy. A short sentence is perfect.
@@ -38,11 +38,11 @@ const MOBILE = `MOBILE READABILITY (people read this on a phone, the #1 rule):
 - Write one clear thought per line. A blank line goes between every thought (the app adds it), so the post breathes.
 - In a list, bullets are short fragments. A line carrying a link or a key detail can be longer, that's fine, never drop info to keep a line short.`;
 
-const SIMPLE_WORDS = `HUMAN EXPLAINER VOICE (this is what makes it NOT sound like AI):
-- Write like a smart friend explaining this to someone. Give context and weave in a light opinion. Use natural connective tissue ("turns out", "here's the cool part", "the catch is", "honestly").
-- Even when you use bullets, the WORDS must sound human and contextual, like a person talking, NOT bare mechanical fragments or a spec sheet. Don't use robotic section labels like "next steps:".
-- Use the plainest everyday words and delete every word you can. Say "keeps up with" not "trades blows with", "fast" not "a beast", "versions" not "variants", "use" not "utilize", "slow" not "sluggish".
-- It must read 100% like a real human wrote it, never like AI.`;
+const SIMPLE_WORDS = `DEAD-SIMPLE, CLEAN ENGLISH (the #1 thing that separates a human from AI):
+- Use the simplest everyday words a normal person uses when texting a friend. Short, plain sentences. Never overcomplicate.
+- NEVER use fancy, formal, or "impressive" words. Concrete swaps: "ways to make money" not "lucrative ventures"; "doing the same" not "following suit"; "working together" not "symbiosis"; "fast"/"strong" not "powerhouse"/"supercharge"/"frontier"; "made" not "generated"; "a lot" not "a plethora"; "use" not "utilize"; "fast" not "a beast"; "versions" not "variants". If a word sounds impressive or formal, swap it for the plain version.
+- Write like a smart friend explaining it: give context, weave in a light opinion, use natural connective tissue ("turns out", "honestly", "the catch is"). Even in bullets, the words sound like a person talking, never a spec sheet or robotic labels ("next steps:").
+- It must read 100% like a real human wrote it in 30 seconds, never like AI.`;
 
 const PUNCTUATION = `PUNCTUATION (this is how people spot AI, it matters a lot):
 - NEVER use a colon on a line by itself as a label or section header ("The catch:", "Next steps:", "The results:"). A colon is ONLY allowed at the end of a natural lead-in line before a bullet list ("here's how it works:") — never as standalone prose punctuation.

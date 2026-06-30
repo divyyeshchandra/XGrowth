@@ -117,7 +117,7 @@ async function generatePost(
 
     const { text } = await generateText({
       model,
-      system: getRestructurePrompt(tone, structure, input.length),
+      system: getRestructurePrompt(tone, structure, input),
       prompt: input,
       maxOutputTokens: 2500,
       temperature: 0.6,

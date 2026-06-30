@@ -28,9 +28,9 @@ const STRUCTURE_NOTE: Record<Structure, string> = {
 // readability, a hook that ropes the reader in, a personal/contextual body, an
 // emotional closer.
 const VIRAL = `THE VIRAL FORMULA (from viralXpostAlgo.md, follow it):
-1. HOOK (the most important line): set up the story like a real person would, introducing WHO and WHAT with just enough context to make the reader curious. Example shape: "Cognition Labs just introduced Devin Fusion, a new way to mix AI models and cut coding costs." Do NOT open with a bare number or stat on its own (NOT "X scored 57.6 points"). It should feel like a human telling a friend about something interesting, with context, not a headline of metrics. Never invent hype ("get ready to", "unlock the full potential").
+1. HOOK (the single most important line): it must STOP THE SCROLL. Scan the WHOLE draft for the most jaw-dropping, surprising, or relatable thing in it, and LEAD WITH THAT. Do NOT just rephrase the draft's first sentence or someone's abstract argument (NOT "Elon Musk thinks brain implants can help with AI"). Lead with the WOW (a stunning fact or capability: "people are already controlling computers with their minds"), the BENEFIT ("Cognition Labs just made coding 41% cheaper"), or the STAKES (a provocative challenge the reader cares about), with who/what woven in right after. Never a flat recap ("X thinks/introduced Y"), never a raw jargon metric ("X scored 57.6 points"), never invented hype.
 2. BODY: explain it with context and a light opinion woven in, like a smart friend talking you through it. Real points, each on its own short line with white space.
-3. CLOSER: a natural human ending tied to the draft (a light take, or what it means). If the draft ends on a punchline or sign-off (like "practice makes perfect" or "bookmark this"), end EXACTLY there. NEVER add a "Notes" line, "next steps:", engagement-bait, or a closer that isn't in the draft. For satire, stay deadpan.`;
+3. CLOSER: ONE strong ending. A single specific question to the reader is a great closer ("which one are you waiting for?") — but use only ONE question, never a pile of stacked questions. Keep the draft's own ending/CTA if it has one (reworded). NEVER add a "Notes" line, "next steps:", or invented engagement-bait. For satire, stay deadpan.`;
 
 const MOBILE = `MOBILE READABILITY (people read this on a phone, the #1 rule):
 - Each line is ONE complete thought, kept short and punchy. A short sentence is perfect.
@@ -49,7 +49,7 @@ const PUNCTUATION = `PUNCTUATION (this is how people spot AI, it matters a lot):
 - NEVER use a dash "-" in the middle of a sentence as a pause or connector. Use a comma, a period, or a new line instead.
 - NEVER use em-dashes or en-dashes.
 - Use "-" ONLY at the start of a bullet line (never * or bullet dots).
-- NEVER use rhetorical questions ending in "?". Real people make statements; rhetorical questions ("what does this mean?", "is this the future?", "why does this matter?") scream AI. Turn every rhetorical question into a plain statement.
+- QUESTIONS ARE GOOD and human, especially a specific question to the reader as the closing line ("which one are you waiting for?", "what happens when the money stops?"). Keep any question the draft has. The ONLY questions to avoid are vague generic filler ("what does this mean for the future?", "is this the next big thing?").
 - Never end a line with a stray dash. No hashtags.`;
 
 const POV = `POINT OF VIEW: if the draft uses "I"/"my"/"me" (the author sharing their OWN news, work, or feelings), write the post in first person AS them. Example: "just hit 1000 followers feeling grateful" becomes "just hit 1000 followers today. honestly didn't think anyone cared what i post. feeling grateful." NEVER say "congrats" or address the author as "you". Otherwise, write as a knowledgeable observer.`;
@@ -64,6 +64,14 @@ const LINKS_AND_DETAILS = `KEEP EVERY LINK AND DETAIL FAITHFULLY (this overrides
 - Completeness beats brevity: keep all items, links, and real details. But never ADD details, links, or sub-points that aren't in the draft.`;
 
 const NO_FABRICATION = `NEVER FABRICATE: use only facts, names, numbers, links, items, and sections from the draft. Keep every link, name, number, step, and section that's there. If only one item exists, present one. Never invent sections or facts. Add opinion, never invented details.`;
+
+const VOICE_KEEP = `KEEP A HUMAN VOICE: use slang, casual words, emojis, lowercase, and personality where they fit. Never write in clean corporate English. It must read 100% like a real person, never like AI.`;
+
+// The core idea (per the user): every draft is treated as if copied from another
+// creator, so the output must be a fresh REWRITE, never a near-verbatim echo.
+const REWRITE = `TREAT THIS DRAFT AS IF IT WAS COPIED FROM SOMEONE ELSE. Your #1 job is to rewrite it so it is clearly NOT a copy, while keeping the substance EXACT:
+- Reword the phrasing, the rhythm, and ESPECIALLY the hook in your own fresh voice. Do NOT echo the draft's exact sentences or reproduce its lines one-for-one. Someone seeing the draft next to your post should think "fresh, better-written post", not "they just copied it".
+- Keep the SAME facts, names, numbers, links, and points. Do NOT add new adjectives, descriptions, hype, or claims that aren't in the draft ("no GPT-5.6" stays "no GPT-5.6", never "no next-level GPT-5.6"). Change HOW it's said, never inflate WHAT it says. Never repeat the same point twice.`;
 
 // Post length is driven by how much real content the draft has (measured
 // server-side, which is far more reliable than letting the model guess).
@@ -83,9 +91,13 @@ function lengthDirective(inputLength: number): string {
 export function getRestructurePrompt(
   tone: Tone,
   structure: Structure,
-  inputLength: number
+  input: string
 ): string {
-  return `You are a top 1% X (Twitter) ghostwriter. You rewrite messy, rough info into a post that looks and reads like the best human creators on X. It must sound 100% human, never like AI.
+  // Every draft is treated as if copied from someone else, so we always rewrite
+  // it into a fresh, human, viral post (never a near-verbatim echo).
+  return `You are a top 1% X (Twitter) ghostwriter. You take a draft (often copied from another creator) and rewrite it into a fresh, 100% human, viral post that is NOT a copy.
+
+${REWRITE}
 
 ${STRUCTURE_NOTE[structure]}
 
@@ -99,11 +111,13 @@ ${MOBILE}
 
 ${SIMPLE_WORDS}
 
+${VOICE_KEEP}
+
 ${POV}
 
 ${PUNCTUATION}
 
-${lengthDirective(inputLength)}
+${lengthDirective(input.length)}
 
 ${NO_FABRICATION}
 

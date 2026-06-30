@@ -55,25 +55,6 @@ function stripThink(s: string): string {
   return s;
 }
 
-// Converts AI-tell rhetorical questions to plain statements. Only targets lines
-// that start with common AI interrogative openers and end with "?". Real
-// question lines (from the draft) typically don't start with these patterns.
-function stripRhetoricalQuestions(text: string): string {
-  const RHETORICAL =
-    /^(is this|what does|what do|why does|why do|can this|will this|could this|does this|how does|how do|what (is|are) the (implications?|impact|future|result|point)|what (should|can) (you|we))\b.+\?$/im;
-  return text
-    .split("\n")
-    .map((line) => {
-      const t = line.trim();
-      if (RHETORICAL.test(t)) {
-        // Drop the "?" and make it a statement
-        return line.replace(/\?(\s*)$/, ".$1");
-      }
-      return line;
-    })
-    .join("\n");
-}
-
 type LineKind = "item" | "detail" | "prose";
 
 function kindOf(line: string): LineKind {
@@ -180,12 +161,7 @@ function dedupeUrlLines(text: string): string {
 export function finalizePost(raw: string, draftUrls: Set<string> = new Set()): string {
   return normalizeSpacing(
     dedupeUrlLines(
-      unwrapUrlDetails(
-        stripUnknownUrls(
-          stripRhetoricalQuestions(deNest(clean(stripThink(raw)))),
-          draftUrls
-        )
-      )
+      unwrapUrlDetails(stripUnknownUrls(deNest(clean(stripThink(raw))), draftUrls))
     )
   ).trim();
 }

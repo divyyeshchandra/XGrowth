@@ -20,7 +20,11 @@ export const PROVIDER_INFO: Record<Provider, ProviderInfo> = {
   },
   openrouter: {
     name: "OpenRouter",
-    defaultModel: "meta-llama/llama-3.3-70b-instruct:free",
+    // gemma-4-31b is the best free OpenRouter model for this app: consistently
+    // available, fast-ish, clean output, follows the prompt. The old default
+    // (meta-llama/llama-3.3-70b-instruct:free) is chronically 429 upstream at
+    // Venice. Note: Groq stays the primary free provider; OpenRouter is fallback.
+    defaultModel: "google/gemma-4-31b-it:free",
     getKeyUrl: "https://openrouter.ai/keys",
     placeholder: "sk-or-...",
   },
@@ -85,3 +89,44 @@ export function createProviderModel(
 }
 
 export const FREE_PROVIDERS: Provider[] = ["groq", "openrouter"];
+
+// Free OpenRouter models intermittently 429 at their upstream provider (shared
+// pools saturate at peak). OpenRouter supports a `models` array (max 3) that it
+// tries in order, falling through on a provider error. We pass a curated chain
+// of real CHAT models (NOT openrouter/free, which can route to a non-chat model
+// like a content-safety classifier and return empty output). The chosen model
+// goes first (quality), with reliable fallbacks behind it.
+const OPENROUTER_FALLBACKS = [
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "meta-llama/llama-3.3-70b-instruct:free",
+];
+
+export function openRouterModelChain(chosen?: string): string[] {
+  const chain = chosen ? [chosen, ...OPENROUTER_FALLBACKS] : [...OPENROUTER_FALLBACKS];
+  return [...new Set(chain)].slice(0, 3); // OpenRouter caps the array at 3
+}
+
+// Groq's token-per-day limit is PER MODEL, so when the primary model is capped
+// we retry on a different Groq model (each has its own daily budget). All three
+// are capable instruct chat models verified to return clean output (gpt-oss
+// returns empty, qwen leaks <think>, compound is agentic — excluded).
+const GROQ_FALLBACKS = [
+  "llama-3.3-70b-versatile", // primary: best quality + prompt adherence
+  "openai/gpt-oss-120b", // cleanest fallback (faithful, doesn't fabricate)
+  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "llama-3.1-8b-instant", // last resort: fast/reliable but weaker (can fabricate POV)
+];
+
+export function groqModelChain(chosen?: string): string[] {
+  const chain = chosen ? [chosen, ...GROQ_FALLBACKS] : [...GROQ_FALLBACKS];
+  return [...new Set(chain)];
+}
+
+// A clear client error (bad request / auth / not found) should NOT fall back to
+// the next model, since it would fail identically everywhere. Everything else
+// (rate-limit 429, 5xx, network) is worth retrying on the next model in a chain.
+export function isClientError(err: unknown): boolean {
+  const status = (err as { statusCode?: number })?.statusCode;
+  return typeof status === "number" && status >= 400 && status < 500 && status !== 429;
+}

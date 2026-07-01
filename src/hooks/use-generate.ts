@@ -10,6 +10,7 @@ export function useGenerate() {
     useSettingsStore();
 
   const [output, setOutput] = useState("");
+  const [modelUsed, setModelUsed] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [abortController, setAbortController] =
@@ -18,6 +19,7 @@ export function useGenerate() {
   const generate = useCallback(
     async (input: string, tone: Tone, structure: Structure) => {
       setOutput("");
+      setModelUsed(null);
       setError(null);
       setIsLoading(true);
 
@@ -44,6 +46,8 @@ export function useGenerate() {
           const data = await res.json();
           throw new Error(data.error || "Generation failed");
         }
+
+        setModelUsed(res.headers.get("X-Model-Used"));
 
         const reader = res.body?.getReader();
         if (!reader) throw new Error("No response stream");
@@ -85,6 +89,7 @@ export function useGenerate() {
 
   return {
     output,
+    modelUsed,
     isLoading,
     error,
     generate,

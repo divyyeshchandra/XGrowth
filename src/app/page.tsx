@@ -34,7 +34,7 @@ export default function Home() {
   const [tone, setTone] = useState<Tone>("Casual");
   const [structure, setStructure] = useState<Structure>("smart");
 
-  const { output, isLoading, error, generate, stop } = useGenerate();
+  const { output, modelUsed, isLoading, error, generate, stop } = useGenerate();
   const {
     score: viralityScore,
     isLoading: viralityLoading,
@@ -196,6 +196,7 @@ export default function Home() {
         <div className="space-y-4">
           <OutputCard
             output={output}
+            modelUsed={modelUsed}
             isLoading={isLoading}
             onCopy={handleCopy}
             onRegenerate={handleRegenerate}

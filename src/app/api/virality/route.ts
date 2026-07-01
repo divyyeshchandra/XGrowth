@@ -1,5 +1,10 @@
 import { generateText, tool } from "ai";
-import { createProviderModel } from "@/lib/ai/providers";
+import {
+  createProviderModel,
+  openRouterModelChain,
+  groqModelChain,
+  isClientError,
+} from "@/lib/ai/providers";
 import { VIRALITY_PROMPT } from "@/lib/ai/prompts";
 import { viralitySchema, type ViralityScoreResult } from "@/lib/ai/virality-schema";
 import { resolveProviderAuth } from "@/lib/api-auth";
@@ -35,27 +40,62 @@ export async function POST(req: Request) {
   const { auth } = authResult;
 
   try {
-    const model = createProviderModel(auth.provider, auth.apiKey, {
-      baseUrl: customBaseUrl,
-      model: customModel,
-    });
+    // Forced tool-calling, not a native json_schema/json_object response format:
+    // tool-calling is supported far more consistently across providers (and
+    // across individual Groq models) than those modes.
+    const tools = {
+      score_post: tool({
+        description: "Score the post using the 4-part viral framework.",
+        inputSchema: viralitySchema,
+      }),
+    };
+    const toolChoice = { type: "tool", toolName: "score_post" } as const;
 
-    // Forced tool-calling, not a native json_schema/json_object response
-    // format: tool-calling is supported far more consistently across
-    // providers (and across individual Groq models) than those modes.
-    const result = await generateText({
-      model,
-      system: VIRALITY_PROMPT,
-      prompt: post,
-      temperature: 0.4,
-      tools: {
-        score_post: tool({
-          description: "Score the post using the 4-part viral framework.",
-          inputSchema: viralitySchema,
-        }),
-      },
-      toolChoice: { type: "tool", toolName: "score_post" },
-    });
+    // Same resilience as the generate route: Groq retries across its model chain
+    // (each model has its own daily token budget); OpenRouter uses its native
+    // `models` array. Other providers (BYOK) make a single call.
+    const runScore = async () => {
+      if (auth.provider === "groq") {
+        let lastErr: unknown;
+        for (const modelId of groqModelChain(customModel)) {
+          try {
+            const model = createProviderModel("groq", auth.apiKey, { model: modelId });
+            return await generateText({
+              model,
+              system: VIRALITY_PROMPT,
+              prompt: post,
+              temperature: 0.4,
+              tools,
+              toolChoice,
+              maxRetries: 0,
+            });
+          } catch (err) {
+            lastErr = err;
+            if (isClientError(err)) throw err;
+          }
+        }
+        throw lastErr;
+      }
+      const model = createProviderModel(auth.provider, auth.apiKey, {
+        baseUrl: customBaseUrl,
+        model: customModel,
+      });
+      const providerOptions =
+        auth.provider === "openrouter"
+          ? { openrouter: { models: openRouterModelChain(customModel) } }
+          : undefined;
+      return generateText({
+        model,
+        system: VIRALITY_PROMPT,
+        prompt: post,
+        temperature: 0.4,
+        tools,
+        toolChoice,
+        providerOptions,
+      });
+    };
+
+    const result = await runScore();
 
     const toolCall = result.toolCalls[0];
     if (!toolCall) throw new Error("No score was generated");

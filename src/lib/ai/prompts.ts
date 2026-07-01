@@ -16,8 +16,8 @@ const STRUCTURE_NOTE: Record<Structure, string> = {
   narrative:
     "STRUCTURE (Narrative): all short prose lines, one thought per line, no bullets. Walk through it like telling a friend.",
   listicle:
-    'STRUCTURE (Listicle): a calm 1-2 line hook (a person talking, NOT hype), then the real points as a clean "-" bullet list. You may put ONE short, specific lead-in line ending with a colon right before the list IF it fits naturally (like "what you get:", "the steps:", "weak points:"). Use AT MOST ONE such lead-in, and only if there is a genuinely distinct group. Bullets are short human clauses, each ONE real fact from the draft, nothing added. Never indent a bullet under another bullet. If a draft item has a link/sub-details, keep them under it (link on its own line, details as ">" lines). End on a plain human line.',
-  curated: `STRUCTURE (Curated): a clean, scannable post (bullets, not prose paragraphs).
+    'STRUCTURE (Listicle): this should be built around a "-" bulleted list. Whenever the draft has separable points (reasons, features, steps, examples, items) pull them into "-" bullets, EVEN if the draft was written as a prose paragraph or opinion. For drafts with real points, an all-prose post is WRONG. CRITICAL: bullets come ONLY from the draft\'s real content. NEVER invent, pad, or split one thought into fake bullets to force a list. If the draft is a single feeling or one-liner with genuinely nothing separable to list (e.g. "hit 1000 followers, feeling grateful"), do NOT fabricate a list, just write it plainly, no fake bullets. Format: a calm 1-2 line hook (a person talking, NOT hype), then the points as a clean "-" bullet list. You may put ONE short, specific lead-in line ending with a colon right before the list IF it fits naturally (like "what you get:", "the steps:", "weak points:"). Use AT MOST ONE such lead-in. Bullets are short human clauses, each ONE real fact from the draft, nothing added. Never indent a bullet under another bullet. If a draft item has a link/sub-details, keep them under it (link on its own line, details as ">" lines). End on a plain human line.',
+  curated: `STRUCTURE (Curated): this should be a clean, scannable BULLETED post (a "-" list, not prose paragraphs). Whenever the draft has separable points pull them into "-" bullets, EVEN if the draft was written as a prose paragraph or opinion. For drafts with real points, an all-prose post is WRONG. CRITICAL: bullets come ONLY from the draft's real content. NEVER invent, pad, or split one thought into fake bullets to force a list. If the draft is a single feeling or one-liner with genuinely nothing separable to list, do NOT fabricate a list, just write it plainly.
 - Start with a calm 1-2 line hook (a person talking, NOT a bullet, NOT a bare stat, NOT hype), maybe one short setup line.
 - If the draft is a list of distinct items (tools, courses, models): each item is "- name", with its link on its own line and its details as ">" lines, ONLY if the draft has them. Never invent items, counts, or details.
 - If the draft is a single topic (announcement, story): present the real points as a clean "-" bullet list. You may use ONE short specific lead-in line ending in a colon ("what you get:", "the steps:") IF it fits. Use AT MOST ONE lead-in. NEVER stack two label sections (like "here's what's changed:" then "the results:") to fake a multi-part structure. Keep all bullets at the same left edge.
@@ -110,7 +110,7 @@ const PUNCTUATION = `PUNCTUATION (this is how people spot AI, it matters a lot):
 
 const POV = `POINT OF VIEW: only write in first person ("I"/"my") if the DRAFT itself uses it (the author sharing their own news, work, or feelings). If the draft is news or third-person (a launch, someone else's announcement), NEVER invent a personal angle like "I just got my hands on X" or "I've been testing X". Write it as a person reporting the news, not as if you did it. If the draft IS first person, keep it first person AS them, and never say "congrats" or flip to "you".`;
 
-const FOLLOW_STRUCTURE = `FOLLOW THE DRAFT'S OWN STRUCTURE (important): if the draft already has a clear structure (sections, levels, headers, numbered steps), keep that SAME structure, the same sections, the same order, the same headers. Do NOT invent new section names. Do NOT reorder. NEVER repeat the same content in two places. Your job is to clean up the wording, simplify it, and fix the spacing, not to reorganize it.`;
+const FOLLOW_STRUCTURE = `FOLLOW THE DRAFT'S OWN SECTIONS: if the draft already has clear sections, levels, or numbered steps, keep the same sections, order, and headers. Do NOT invent new section names, do NOT reorder, NEVER repeat the same content twice. This is ONLY about not reorganizing the draft's real content. It NEVER overrides the chosen output structure above: if Listicle or Curated is selected, you MUST still turn the content into a bulleted list, even when the draft was a plain prose paragraph.`;
 
 const LINKS_AND_DETAILS = `KEEP EVERY LINK AND DETAIL FAITHFULLY (this overrides brevity, but never add anything):
 - Keep EVERY link/URL from the draft, exactly as written, and each one ONCE. Never repeat a link.
@@ -173,7 +173,18 @@ export function getRestructurePrompt(
   // Every draft is treated as if copied from someone else, so we always rewrite
   // it into a fresh, calm, human post (never a near-verbatim echo). The VOICE
   // anchor + COMPRESS rule lead because they are what make it read human.
+  // Whether the chosen structure REQUIRES a bulleted list (the model otherwise
+  // tends to default everything to calm prose, i.e. narrative).
+  const needsBullets = structure === "listicle" || structure === "curated";
+  const formatReminder = needsBullets
+    ? `Output ONLY the finished post, formatted as a ${structure}: pull the draft's real points into "-" bullets (only skip bullets if the draft truly has no separable points). Never fabricate bullets. No preamble, no labels, no quotes.`
+    : "Output ONLY the finished post. No preamble, no labels, no quotes.";
+
   return `You are a ghostwriter for X (Twitter). You take a rough draft (often copied from another creator) and rewrite it so it reads exactly like a calm, real person wrote it. Not like AI, not like marketing.
+
+${STRUCTURE_NOTE[structure]}
+
+${FOLLOW_STRUCTURE}
 
 ${VOICE}
 
@@ -184,10 +195,6 @@ ${COMPRESS}
 ${VIRAL}
 
 ${POV}
-
-${STRUCTURE_NOTE[structure]}
-
-${FOLLOW_STRUCTURE}
 
 ${LINKS_AND_DETAILS}
 
@@ -203,5 +210,5 @@ ${NO_FABRICATION}
 
 TONE: ${tone} - ${TONE_NOTE[tone]}
 
-Output ONLY the finished post. No preamble, no labels, no quotes.`;
+${formatReminder}`;
 }

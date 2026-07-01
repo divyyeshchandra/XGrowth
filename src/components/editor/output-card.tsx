@@ -5,13 +5,22 @@ import { Copy, RotateCcw, Sparkles, Loader2, Check } from "lucide-react";
 
 interface OutputCardProps {
   output: string;
+  modelUsed?: string | null;
   isLoading: boolean;
   onCopy: () => void;
   onRegenerate: () => void;
 }
 
+// Short, human label for a model id: drop the org prefix and any ":free"/date
+// suffix. e.g. "meta-llama/llama-4-scout-17b-16e-instruct" -> "llama-4-scout-17b-16e-instruct",
+// "google/gemma-4-31b-it:free" -> "gemma-4-31b-it".
+function prettyModel(id: string): string {
+  return id.split("/").pop()!.replace(/:free$/, "").replace(/-\d{8}$/, "");
+}
+
 export function OutputCard({
   output,
+  modelUsed,
   isLoading,
   onCopy,
   onRegenerate,
@@ -68,7 +77,15 @@ export function OutputCard({
           <div className="whitespace-pre-wrap text-[15px] leading-[1.75] text-foreground/90">
             {output}
           </div>
-          <div className="flex justify-end mt-3 pt-2 border-t border-white/[0.04]">
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/[0.04]">
+            {modelUsed ? (
+              <span className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground/30">
+                <Sparkles className="h-3 w-3 text-[#6C8EEF]/40" />
+                {prettyModel(modelUsed)}
+              </span>
+            ) : (
+              <span />
+            )}
             <span className="text-[11px] font-mono text-muted-foreground/30">
               {output.length} chars
             </span>
